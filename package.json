@@ -1,30 +1,11 @@
 {
-  "name": "open-once-extension",
-  "displayName": "Open Files Once",
-  "description": "Automatically opens specified files and allows opening a specific file with a command.",
-  "version": "0.0.2",
+  "name": "open-once-http",
+  "displayName": "Open Files via HTTP",
+  "description": "Opens a specific file, closes others, and hides the sidebar via HTTP requests",
+  "version": "0.0.1",
   "engines": { "vscode": "^1.50.0" },
-  "activationEvents": ["onStartupFinished", "onCommand:openOnce.openFile"],
+  "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "openOnce.openFile",
-        "title": "Open a File Once",
-        "category": "OpenOnce"
-      }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "Open Once Extension",
-      "properties": {
-        "openOnce.files": {
-          "type": "array",
-          "description": "List of files to open once when this workspace is first launched",
-          "default": ["README.md"]
-        }
-      }
-    }
-  },
   "categories": ["Other"]
 }
+
