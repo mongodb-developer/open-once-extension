@@ -1,63 +1,65 @@
 const vscode = require("vscode");
 const path = require("path");
-const http = require("http");
-const fs = require("fs");
 
-const READY_FILE = "/tmp/open-once-http-ready";
+let lastFiles = [];
 
+async function closeDistractions() {
+    console.log("Hide the sidebar");
+    await vscode.commands.executeCommand("workbench.action.closeSidebar");
 
-async function openFileAndCloseOthers(filePath) {
+    console.log("Close all other editors");
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+}
+
+async function openFiles(files) {
+    if (!files || files.length === 0) {
+        console.debug("No files to open");
+        return;
+    }
+
+    // Compare with last opened files
+    const filesChanged = JSON.stringify(files) !== JSON.stringify(lastFiles);
+    if (!filesChanged) {
+        return; // nothing changed
+    }
+
     try {
-        // Hide the sidebar
-        await vscode.commands.executeCommand("workbench.action.closeSidebar");
+        // Open each file
+        for (const file of files) {
+            const filePath = path.isAbsolute(file)
+                ? file
+                : path.join(vscode.workspace.rootPath || "", file);
+            const doc = await vscode.workspace.openTextDocument(filePath);
 
-        // Close all other editors
-        await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+            console.debug("Opening document " + doc);
+            await vscode.window.showTextDocument(doc);
+        }
 
-        // Open the requested file
-        const uri = vscode.Uri.file(filePath);
-        const doc = await vscode.workspace.openTextDocument(uri);
-        await vscode.window.showTextDocument(doc, { preview: false });
+        // update lastFiles after successful open
+        lastFiles = files;
     } catch (err) {
-        console.error("Failed to open file:", filePath, err);
+        console.error("Error opening files:", err);
     }
 }
 
 function activate(context) {
-    const port = 8090; // local port for commands
+    closeDistractions();
 
-    const server = http.createServer(async (req, res) => {
-        if (req.method === "POST" && req.url.startsWith("/open-file")) {
-            let body = "";
-            req.on("data", chunk => body += chunk);
-            req.on("end", async () => {
-                try {
-                    const data = JSON.parse(body);
-                    if (!data.file) throw new Error("Missing 'file' field");
-                    const filePath = path.isAbsolute(data.file)
-                        ? data.file
-                        : path.join(vscode.workspace.rootPath || "", data.file);
-                    await openFileAndCloseOthers(filePath);
-                    res.writeHead(200);
-                    res.end(JSON.stringify({ success: true }));
-                } catch (err) {
-                    res.writeHead(400);
-                    res.end(JSON.stringify({ success: false, error: err.message }));
-                }
-            });
-        } else {
-            res.writeHead(404);
-            res.end("Not found");
+    const config = vscode.workspace.getConfiguration();
+    const filesToOpen = config.get("openOnce.files", []);
+    console.debug("Files to open: ");
+    console.debug(filesToOpen);
+    openFiles(filesToOpen);
+
+    // Listen for changes in openOnce.files
+    const disposable = vscode.workspace.onDidChangeConfiguration(event => {
+        if (event.affectsConfiguration("openOnce.files")) {
+            const updatedFiles = vscode.workspace.getConfiguration().get("openOnce.files", []);
+            openFiles(updatedFiles);
         }
     });
 
-    server.listen(port, "127.0.0.1", () => {
-        console.log(`Open-once HTTP server listening on http://127.0.0.1:${port}`);
-        fs.writeFileSync(READY_FILE, "ready");
-    });
-
-
-    context.subscriptions.push({ dispose: () => server.close() });
+    context.subscriptions.push(disposable);
 }
 
 function deactivate() {}
