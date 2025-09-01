@@ -1,6 +1,10 @@
 const vscode = require("vscode");
 const path = require("path");
 const http = require("http");
+const fs = require("fs");
+
+const READY_FILE = "/tmp/open-once-http-ready";
+
 
 async function openFileAndCloseOthers(filePath) {
     try {
@@ -49,7 +53,9 @@ function activate(context) {
 
     server.listen(port, "127.0.0.1", () => {
         console.log(`Open-once HTTP server listening on http://127.0.0.1:${port}`);
+        fs.writeFileSync(READY_FILE, "ready");
     });
+
 
     context.subscriptions.push({ dispose: () => server.close() });
 }

@@ -2,7 +2,7 @@
   "name": "open-once-http",
   "displayName": "Open Files via HTTP",
   "description": "Opens a specific file, closes others, and hides the sidebar via HTTP requests",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "engines": { "vscode": "^1.50.0" },
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
