@@ -2,10 +2,12 @@
   "name": "open-once-extension",
   "displayName": "Open Once Extension",
   "description": "Opens specified files from settings.json, hides the sidebar, and reacts to changes",
-  "version": "0.0.7",
+  "author": "Stanimira Vlaeva <stanimira.vlaeva@mongodb.com>",
+  "version": "0.0.9",
   "engines": { "vscode": "^1.50.0" },
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
-  "categories": ["Other"]
+  "categories": ["Other"],
+  "repository": "https://github.com/mongodb-developer/open-once-extension"
 }
 
