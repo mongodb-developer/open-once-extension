@@ -8,6 +8,9 @@
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
   "categories": ["Other"],
-  "repository": "https://github.com/mongodb-developer/open-once-extension"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mongodb-developer/open-once-extension.git"
+  }
 }
 
