@@ -62,7 +62,7 @@ async function openFiles(files) {
             const doc = await vscode.workspace.openTextDocument(uri);
             console.log("Opening file: " + doc.uri.fsPath);
             try {
-                await vscode.window.showTextDocument(doc);
+                await vscode.window.showTextDocument(doc, { preview: false });
             } catch (error) {
                 console.error("Error opening file:", error);
             }
